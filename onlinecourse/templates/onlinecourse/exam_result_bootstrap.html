@@ -39,16 +39,42 @@
     {% if grade > 80 %}
     <div class="alert alert-success">
        <!--HINT Display passed info -->
+       <b>Congratulations, {{user.first_name}}!</b> You have passed the exam and completed the course with score {{grade}}/100
     </div>
         {% else %}
         <div class="alert alert-danger">
             <!--HINT Display failed info -->
+            <b>Failed</b> Sorry, {{user.first_name}}! You have failed the exam with score {{grade}}/100
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
         {% endif %}
         <div class="card-columns-vertical mt-1">
         <h5 class="">Exam results</h5>
             <!--HINT Display exam results-->
+            {% for question in course.question_set.all %}
+            <div class="card mt-1">
+                <div class="card-header"><h5>{{question.content}}</h5></div>
+                {% csrf_token %}
+                <div class="form-group">
+                {% for choice in question.choice_set.all %}
+                <!-- add if statements to check if the user selected the correct answer -->
+                    {% if choice.correct_choice and choice in submission.choices.all %}
+                    <!-- green if the user selected the correct answer -->
+                    <div class="form-check text-success">Correct answer: {{ choice.content }}</div>
+                    {% elif choice.correct_choice %}
+                    <!-- yellow if the choice is correct but the user did not choose it -->
+                    <div class="form-check text-warning">Not selected: {{ choice.content }}</div>
+                    {% elif choice.correct_choice == False and choice in submission.choices.all %}
+                    <!-- red if the choice is incorrect and the user chose it -->
+                    <div class="form-check text-danger">Incorrect answer: {{ choice.content }}</div>
+                    {% else %}
+                    <!-- if the choice is incorrect and the user did not choose it, then it is black -->
+                    <div class="form-check">{{ choice.content }}</div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
         </div>
     </div>
 </body>
